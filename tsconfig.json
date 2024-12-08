@@ -20,6 +20,8 @@
       "#common": ["src/common"],
       "#user/*": ["src/user/*"],
       "#auth/*": ["src/auth/*"],
+      "#topic/*": ["src/topic/*"],
+      "#post/*": ["src/post/*"],
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -17,8 +17,16 @@ export class UserCommandRepository {
   ) {}
 
   public async create(input: CreateUserInput): Promise<User> {
-    const user = await this.userEntity.create(input);
-    return UserMapper.mapEntityToModel(user);
+    try {
+      const user = await this.userEntity.create(input);
+      return UserMapper.mapEntityToModel(user);
+    } catch (err) {
+      if (err.code === 11000) {
+        const message = `User already exists`;
+        throw new ConflictException(message);
+      }
+      throw err;
+    }
   }
 
   public async createMany(input: CreateUserInput[]): Promise<number> {
