@@ -34,15 +34,23 @@ export class UserCommandRepository {
   }
 
   public async updateOne(input: FindUserInput, data: UpdateUserInput): Promise<User> {
-    const filter = UserQueryBuilder.findUserQuery(input);
-    const updateData = UserQueryBuilder.updateUserQuery(data);
-    const user = await this.userEntity.findOneAndUpdate(filter, updateData, { lean: true, new: true }).exec();
+    try {
+      const filter = UserQueryBuilder.findUserQuery(input);
+      const updateData = UserQueryBuilder.updateUserQuery(data);
+      const user = await this.userEntity.findOneAndUpdate(filter, updateData, { lean: true, new: true }).exec();
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return UserMapper.mapEntityToModel(user);
+    } catch (err) {
+      if (err.code === 11000) {
+        const message = `User already exists`;
+        throw new ConflictException(message);
+      }
+      throw err;
     }
-
-    return UserMapper.mapEntityToModel(user);
   }
 
   public async updateMany(input: FindUsersInput, data: UpdateUserInput): Promise<number> {

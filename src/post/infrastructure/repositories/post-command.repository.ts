@@ -21,8 +21,7 @@ export class PostCommandRepository {
       return PostMapper.mapEntityToModel(post);
     } catch (err) {
       if (err.code === 11000) {
-        const message = `Post already exists`;
-        throw new ConflictException(message);
+        throw new ConflictException('Post already exists');
       }
       throw err;
     }
@@ -32,10 +31,13 @@ export class PostCommandRepository {
     return (await this.postEntity.insertMany(input)).length;
   }
 
-  public async updateOne(input: FindPostInput, data: UpdatePostInput): Promise<Post> {
+  public async updateOne(input: FindPostInput, data: UpdatePostInput, options: UpdateOptions = {}): Promise<Post> {
+    const defaultOptions = { lean: true, new: true };
+    const mergedOptions = { ...defaultOptions, ...options };
+
     const filter = PostQueryBuilder.findPostQuery(input);
     const updateData = PostQueryBuilder.updatePostQuery(data);
-    const post = await this.postEntity.findOneAndUpdate(filter, updateData, { lean: true, new: true }).exec();
+    const post = await this.postEntity.findOneAndUpdate(filter, updateData, mergedOptions).exec();
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -51,13 +53,15 @@ export class PostCommandRepository {
     return (await this.postEntity.updateMany(filter, updateData)).modifiedCount;
   }
 
-  public async deleteOne(input: FindPostInput): Promise<void> {
+  public async deleteOne(input: FindPostInput): Promise<Post> {
     const filter = PostQueryBuilder.findPostQuery(input);
     const post = await this.postEntity.findOneAndDelete(filter).exec();
 
     if (!post) {
       throw new NotFoundException('Post not found');
     }
+
+    return PostMapper.mapEntityToModel(post);
   }
 
   public async deleteMany(input: FindPostsInput): Promise<number> {
@@ -72,3 +76,5 @@ type CreatePostInput = {
   topicId: string;
   createdBy: string;
 };
+
+type UpdateOptions = { lean?: boolean; new?: boolean };

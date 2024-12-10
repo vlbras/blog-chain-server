@@ -38,4 +38,8 @@ export class PostQueryRepository {
 
     return posts.map(PostMapper.mapEntityToModel);
   }
+
+  public count(input: FindPostsInput): Promise<number> {
+    return this.postEntity.countDocuments(input);
+  }
 }

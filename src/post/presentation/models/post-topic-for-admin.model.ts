@@ -1,9 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import { PostForAdmin } from './post-for-admin.mode';
 
 import { Post, Topic } from '#post/domain/models';
 import { User } from '#user/domain/models';
 
+class TopicProps {
+  @ApiProperty()
+  public id: string;
+
+  @ApiProperty()
+  public name: string;
+}
+
 export class PostTopicForAdmin extends PostForAdmin {
+  @ApiProperty()
   public topic: TopicProps;
 }
 
@@ -29,9 +40,4 @@ export function toPostTopicForAdminModel(model: Post, topic: Topic, creator: Use
     createdAt: model.createdAt,
     updatedAt: model.updatedAt,
   };
-}
-
-class TopicProps {
-  public id: string;
-  public name: string;
 }

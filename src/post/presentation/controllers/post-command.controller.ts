@@ -5,7 +5,7 @@ import { ActionResponse, AuthRoles, CurrentUserId, UserRoles } from '#common';
 import { PostCommandService } from '#post/application/services';
 import { CreatePostDto, UpdatePostDto } from '#post/presentation/dto';
 
-@ApiTags('post')
+@ApiTags('post - command')
 @ApiBearerAuth()
 @Controller('admin/post')
 @AuthRoles(UserRoles.ADMIN)
@@ -23,9 +23,8 @@ export class PostCommandController {
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
     @CurrentUserId() userId: string,
-  ): Promise<ActionResponse> {
-    const post = await this.postCommandService.updateOne(id, updatePostDto, userId);
-    return { id: post.id };
+  ): Promise<void> {
+    return this.postCommandService.updateOne(id, updatePostDto, userId);
   }
 
   @Delete(':id')

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -17,6 +17,7 @@ export class TopicRepository {
     const topic = await this.topicEntity.findById(id);
 
     if (!topic) {
+      // eslint-disable-next-line sonarjs/no-duplicate-string
       throw new NotFoundException('Topic not found');
     }
 
@@ -33,7 +34,31 @@ export class TopicRepository {
     return topic._id.toString();
   }
 
-  // TODO: updateOne and deleteOne for admin
+  public async updateOne(id: string, data: { name: string }): Promise<Topic> {
+    try {
+      const topic = await this.topicEntity.findByIdAndUpdate(id, data, { lean: true, new: true }).exec();
+
+      if (!topic) {
+        throw new NotFoundException('Topic not found');
+      }
+
+      return this.mapEntityToModel(topic);
+    } catch (err) {
+      if (err.code === 11000) {
+        throw new ConflictException('Topi name already taken');
+      }
+
+      throw err;
+    }
+  }
+
+  public async deleteOne(id: string): Promise<void> {
+    const topic = await this.topicEntity.findByIdAndDelete(id);
+
+    if (!topic) {
+      throw new NotFoundException('Topic not found');
+    }
+  }
 
   private mapEntityToModel(entity: TopicEntity): Topic {
     return {

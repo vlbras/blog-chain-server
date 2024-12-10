@@ -6,7 +6,7 @@ import { PostForAdmin, PostModel, PostTopicForAdmin, TopicModel, toPostModel } f
 import { AuthRoles, UserRoles } from '#common';
 import { PostQueryService } from '#post/application/services';
 
-@ApiTags('Posts')
+@ApiTags('post - query')
 @ApiBearerAuth()
 @Controller()
 export class PostQueryController {

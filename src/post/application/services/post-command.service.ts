@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { Post } from '#post/domain/models';
-import { PostCommandRepository, TopicRepository } from '#post/infrastructure/repositories';
+import { PostCommandRepository, PostQueryRepository, TopicRepository } from '#post/infrastructure/repositories';
 import { CreatePostDto, UpdatePostDto } from '#post/presentation/dto';
 
 @Injectable()
 export class PostCommandService {
   public constructor(
     private readonly postRepository: PostCommandRepository,
+    private readonly postQueryRepository: PostQueryRepository,
     private readonly topicRepository: TopicRepository,
   ) {}
 
@@ -21,22 +22,32 @@ export class PostCommandService {
     });
   }
 
-  public async updateOne(id: string, updatePostDto: UpdatePostDto, updatedBy: string): Promise<Post> {
+  public async updateOne(id: string, updatePostDto: UpdatePostDto, updatedBy: string): Promise<void> {
     const topicId = await this.topicRepository.upsert(updatePostDto.topicName);
 
-    return this.postRepository.updateOne(
+    const post = await this.postRepository.updateOne(
       { id },
       {
         ...updatePostDto,
         topicId,
         updatedBy,
       },
+      { new: false },
     );
+
+    await this.autoDeleteTopic(post.topicId);
   }
 
   public async deleteOne(id: string): Promise<void> {
-    await this.postRepository.deleteOne({ id });
+    const post = await this.postRepository.deleteOne({ id });
+    await this.autoDeleteTopic(post.topicId);
   }
 
-  // TODO: autoDeleteTopic
+  private async autoDeleteTopic(topicId: string): Promise<void> {
+    const postsCount = await this.postQueryRepository.count({ topicId });
+
+    if (postsCount === 0) {
+      await this.topicRepository.deleteOne(topicId);
+    }
+  }
 }
