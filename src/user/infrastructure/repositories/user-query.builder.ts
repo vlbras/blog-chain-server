@@ -16,11 +16,14 @@ export class UserQueryBuilder {
   }
 
   public static findUsersQuery(input: FindUsersInput): FilterQuery<UserEntity> {
-    // if (Object.keys(input).length === 0) {
-    //   throw new BadRequestException('No filter provided');
-    // }
+    const filter: FilterQuery<UserEntity> = {};
 
-    return input;
+    input.ids && (filter._id = { $in: input.ids });
+    input.role && (filter.role = input.role);
+
+    // TODO: add pagination
+
+    return filter;
   }
 
   public static updateUserQuery(input: UpdateUserInput): UpdateQuery<UserEntity> {
@@ -38,6 +41,7 @@ export type FindUserInput = AtLeastOne<{
 }>;
 
 export type FindUsersInput = {
+  ids?: string[];
   role?: UserRoles;
 };
 

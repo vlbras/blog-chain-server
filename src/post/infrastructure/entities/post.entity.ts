@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
+
+import { TopicEntity } from './topic.entity';
 
 import { AbstractEntity } from '#common';
-import { User } from '#user/domain/models';
 
 @Schema({
   collection: 'posts',
@@ -19,7 +21,9 @@ export class PostEntity extends AbstractEntity {
   public content: string;
 
   @Prop({
-    required: true,
+    type: Types.ObjectId,
+    index: true,
+    ref: TopicEntity.name,
   })
   public topicId: string;
 
@@ -28,7 +32,8 @@ export class PostEntity extends AbstractEntity {
   })
   public createdBy: string;
 
-  public user?: User;
+  @Prop()
+  public updatedBy?: string;
 }
 
 export const PostSchema = SchemaFactory.createForClass(PostEntity);

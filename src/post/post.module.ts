@@ -1,17 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { PostAdminsController } from './controllers/post-admin.controller';
-import { PostController } from './controllers/post.controller';
-import { PostEntity, PostSchema } from './entities/post.entity';
-import { PostAdminService } from './services/post-admin.service';
-import { PostService } from './services/post.service';
-
-import { TopicModule } from '#topic/topic.module';
+import { PostApplicationModule } from './application/post-application.module';
+import { PostCommandController } from './presentation/controllers/post-command.controller';
+import { PostQueryController } from './presentation/controllers/post-query.controller';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: PostEntity.name, schema: PostSchema }]), TopicModule],
-  controllers: [PostController, PostAdminsController],
-  providers: [PostService, PostAdminService],
+  imports: [PostApplicationModule],
+  controllers: [PostCommandController, PostQueryController],
 })
 export class PostModule {}

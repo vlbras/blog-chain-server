@@ -10,6 +10,6 @@ export class FindUsersQueryHandler implements IQueryHandler<FindUsersQuery, User
   public constructor(private readonly userRepository: UserQueryRepository) {}
 
   public async execute(query: FindUsersQuery): Promise<User[]> {
-    return this.userRepository.findMany(query);
+    return this.userRepository.findMany(query.input);
   }
 }

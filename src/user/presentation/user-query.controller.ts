@@ -18,7 +18,7 @@ export class UserQueryController {
   @ApiOkResponse({ type: UserModel, isArray: true })
   @Get()
   public findMany(): Promise<UserModel[]> {
-    const query = new FindUsersQuery();
+    const query = new FindUsersQuery({});
     return this.userFacade.findMany(query);
   }
 

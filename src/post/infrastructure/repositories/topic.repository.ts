@@ -2,11 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { TopicEntity } from './entities/topic.entity';
-import { Topic } from './models/topic.model';
+import { TopicEntity } from '../entities';
+
+import { Topic } from '#post/domain/models';
 
 @Injectable()
-export class TopicService {
+export class TopicRepository {
   public constructor(
     @InjectModel(TopicEntity.name)
     private readonly topicEntity: Model<TopicEntity>,
@@ -23,36 +24,7 @@ export class TopicService {
   }
 
   public async findMany(): Promise<Topic[]> {
-    const topics = await this.topicEntity.aggregate([
-      {
-        $addFields: {
-          topicIdAsString: { $toString: '$_id' },
-        },
-      },
-      {
-        $lookup: {
-          from: 'posts',
-          localField: 'topicIdAsString',
-          foreignField: 'topicId',
-          as: 'posts',
-        },
-      },
-      {
-        $project: {
-          id: '$_id',
-          name: 1,
-          posts: {
-            $map: {
-              input: { $sortArray: { input: '$posts', sortBy: { createdAt: 1 } } },
-              as: 'post',
-              in: { _id: '$$post._id', title: '$$post.title' },
-            },
-          },
-        },
-      },
-      { $sort: { createdAt: 1 } },
-    ]);
-
+    const topics = await this.topicEntity.find().sort({ createdAt: 1 }).lean().exec();
     return topics.map(this.mapEntityToModel);
   }
 
@@ -67,11 +39,8 @@ export class TopicService {
     return {
       id: entity._id.toString(),
       name: entity.name,
-      posts:
-        entity.posts?.map(post => ({
-          id: post._id.toString(),
-          title: post.title,
-        })) || [],
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
     };
   }
 }

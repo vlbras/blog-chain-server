@@ -3,4 +3,8 @@ export type Post = {
   title: string;
   content: string;
   topicId: string;
+  createdBy: string;
+  updatedBy?: string;
+  createdAt: string;
+  updatedAt: string;
 };

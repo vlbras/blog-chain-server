@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { CreateUserDto, FindUserDto } from './dto';
+import { CreateUserDto, FindUserDto, FindUsersDto } from './dto';
 
 import { CreateUserCommand, UserCommandFacade } from '#user/application/commands';
-import { FindUserQuery, UserQueryFacade } from '#user/application/queries';
+import { FindUserQuery, FindUsersQuery, UserQueryFacade } from '#user/application/queries';
 import { User } from '#user/domain/models';
 
 @Injectable()
@@ -22,5 +22,10 @@ export class UserIntegrationService {
   public async findOne(payload: FindUserDto): Promise<User> {
     const query = new FindUserQuery(payload);
     return this.userQueryFacade.findOne(query);
+  }
+
+  public async findMany(payload: FindUsersDto): Promise<User[]> {
+    const query = new FindUsersQuery(payload);
+    return this.userQueryFacade.findMany(query);
   }
 }
